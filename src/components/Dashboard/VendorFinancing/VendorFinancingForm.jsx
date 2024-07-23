@@ -47,7 +47,7 @@ const VendorFinancingForm = (props) => {
 
   const [data, setData] = useState({
     annualTurnover: '',
-    panNo: '',
+    panCardNumber: '',
     name: '',
     email: '',
     dob: date,
@@ -96,32 +96,49 @@ const VendorFinancingForm = (props) => {
 
   const onFetchDetails = async (e) => {
     e.preventDefault();
+
+    const uuid = 'abc123'; // Ensure to dynamically retrieve or pass this UUID if needed.
+
     try {
-      const uuid = 'abc123'; // Replace with actual UUID value
-      const response = await fetch(`http://ec2-35-154-147-165.ap-south-1.compute.amazonaws.com:8080/saveUserDetails?uuid=${uuid}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data, 
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      
-      const result = await response.json();
-      console.log('API Response:', result);
-      
-     
-      setStep(2);
+        const response = await fetch(`http://ec2-35-154-147-165.ap-south-1.compute.amazonaws.com:8080/saveUserDetails?uuid=${uuid}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...data,
+            }),
+        });
+
+        console.log('Response Status:', response.status);
+        console.log('Response Headers:', [...response.headers]);
+
+        
+        if (!response.ok) {
+            const responseBody = await response.text();
+            console.error(`Network response was not ok. Status: ${response.status}. Body: ${responseBody}`);
+            throw new Error(`Network response was not ok. Status: ${response.status}. Body: ${responseBody}`);
+        }
+
+        
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+            const result = await response.json();
+            console.log('API Response:', result);
+        } else {
+            console.error('Expected JSON response but received:', contentType);
+            throw new Error('Expected JSON response but received: ' + contentType);
+        }
+
+        // Proceed to the next step if response is successful
+        setStep(2);
     } catch (error) {
-      console.error('Failed to fetch details:', error);
-     
+        console.error('Failed to fetch details:', error);
     }
-  };
+};
+
+
+
   
   // const onSubmitSecondForm = () => {
   //   console.log("Step 2 Data:", data);
@@ -292,8 +309,8 @@ const VendorFinancingForm = (props) => {
                 <label className="block text-lg font-medium text-gray-700 mb-1">PAN Card Number</label>
                 <input
                   type="text"
-                  name="panNo"
-                  value={data.panNo}
+                  name="panCardNumber"
+                  value={data.panCardNumber}
                   onChange={(e) => onChangeHandler(e.target.value, e.target.name)}
                   placeholder="XXXX XXXX XXXX"
                   className="block w-full rounded-md bg-gray-100 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
@@ -484,11 +501,11 @@ const VendorFinancingForm = (props) => {
                   <span class="w-6 h-6 bg-indigo-50 border-2 border-indigo-600 rounded-full flex justify-center items-center mx-auto text-indigo-600 mb-3 text-sm sm:w-10 sm:h-10">3</span>
                 </div>
               </li>
-              <li class="flex w-full relative text-gray-900">
+              {/* <li class="flex w-full relative text-gray-900">
                 <div class="block whitespace-nowrap z-10">
-                  <span class="w-6 h-6 bg-gray-50 border-2 border-gray-200 rounded-full flex justify-center items-center mx-auto mb-3 text-sm sm:w-10 sm:h-10">4</span>
+                   <span class="w-6 h-6 bg-gray-50 border-2 border-gray-200 rounded-full flex justify-center items-center mx-auto mb-3 text-sm sm:w-10 sm:h-10">4</span>
                 </div>
-              </li>
+              </li> */}
             </ol>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
             <div>
